@@ -10,6 +10,7 @@ const app = express();
 /* Middleware*/
 //Here we are configuring express to use body-parser as middle-ware.
 const bodyParser = require('body-parser');
+//bodyParser.urlencoded is Deprecated.
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
