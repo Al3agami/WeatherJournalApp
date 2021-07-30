@@ -30,4 +30,5 @@ This repo contains a web application files:
 
 ## Resources
 - fonts.googleapis.com : to apply some font styles to the page text.
+- OpenWeatherMap.com : to use API to get weather by Zip code
 
