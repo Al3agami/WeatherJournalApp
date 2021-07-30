@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      ** Helper Functions 
      **/
-    const isNullOrEmpty = (str) => { return str == null || str == 'undefined' || str.trim() == '' ? true : false; }
+    const isNullOrEmpty = (str) => { return str == null || str == 'undefined' || str.toString().trim() == '' ? true : false; }
 
     const buildWeatherURL = (zipcode) => { return baseURL + zipcode + apiKey; }
 
