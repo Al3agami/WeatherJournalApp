@@ -30,9 +30,9 @@ const server = app.listen(port, () => console.log(`localhost started on port: ${
 app.post('/postData', (req, res) => {
     projectData = req.body;
     console.log(projectData);
-    res.send(projectData);
+    res.send(JSON.stringify(projectData));
 });
 
 app.get('/getData', (req, res) => {
-    res.send(projectData);
+    res.send(JSON.stringify(projectData));
 });

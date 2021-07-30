@@ -3,7 +3,9 @@
  * api.openweathermap.org/data/2.5/weather?zip=94040,us&appid={API key}
  */
 document.addEventListener('DOMContentLoaded', () => {
-    /*** Global Variables ***/
+    /**
+     ** Global Variables
+     **/
     const baseURL = 'https://api.openweathermap.org/data/2.5/weather?zip=';
     const apiKey = ',us&appid=4a757f3c4ec2d8ed17d63e4f714e75a2';
 
@@ -11,11 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let d = new Date();
     let newDate = d.getMonth() + '.' + d.getDate() + '.' + d.getFullYear();
 
-    /*** END Global Variables ***/
+    /**
+     ** END Global Variables 
+     **/
 
 
 
-    /*** Helper Functions ***/
+    /**
+     ** Helper Functions 
+     **/
     const isNullOrEmpty = (str) => { return str == null || str == 'undefined' || str.trim() == '' ? true : false; }
 
     const buildWeatherURL = (zipcode) => { return baseURL + zipcode + apiKey; }
@@ -27,11 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
     / ${weather.weather[0].description}`;
     }
 
-    /*** END Helper Functions ***/
+    /**
+     ** END Helper Functions 
+     **/
 
 
 
-    /*** API Calls Functions ***/
+    /**
+     ** API Calls Functions 
+     **/
     const getWeather = async(buildWeatherURL, zipCode = '') => { // Build url with zipCode arg, and get the weather
         const url = buildWeatherURL(zipCode);
         const res = await fetch(url);
@@ -66,43 +76,70 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /*** END API Calls Functions ***/
+    const getData = async url => { // Get Weather data from server projectData
+        const res = await fetch(url);
+        try {
+            const projData = await res.json();
+            return projData;
+        } catch (error) {
+            alert('An error occured please try again');
+            console.log('An error occured:', console.error());
+            return null;
+        }
+    }
+
+    /**
+     ** END API Calls Functions 
+     **/
 
 
 
-    /*** Application Main functions ***/
+    /**
+     ** Application Main functions 
+     **/
     const checkWeather = async() => { // Chain call to: GET weather with Zipcode THEN Update interface with result data of the API call
         const zipCode = document.querySelector('#zip').value;
-        if (isNullOrEmpty(zipCode)) { alert('Incorrect Zip, enter valid Zip'); return; }
+        if (isNullOrEmpty(zipCode)) { alert('Please enter Zip code'); return; }
         getWeather(buildWeatherURL, zipCode)
-            .then(async(data) => {
-                if (isNullOrEmpty(data) || data == 0) { return; }
-                getUserEntriesAndSave(data);
+            .then((weatherDesc) => {
+                if (weatherDesc == 0 || isNullOrEmpty(weatherDesc)) { throw new Error('BreakChain'); }
+                getUserEntriesAndSaveWeather(weatherDesc);
+            }).then(() => {
+                updateUI();
+            }).catch(err => {
+                console.log(err);
+                return;
             });
     }
 
-    const getUserEntriesAndSave = async(weatherDesc) => { // Read user input and Update interface with result data of the API call
+    const getUserEntriesAndSaveWeather = async weatherDesc => { // Read user input and save data object to server object
         const howItFeels = document.querySelector('#feelings').value;
-
         // We can make the feeling area mandatory by removing comment from the next line:
         // if (isNullOrEmpty(howItFeels)) { alert('Please enter How Are You Feeling Today.'); return; }
-
-        const projData = await saveData('/postData', { temp: weatherDesc, date: newDate, content: howItFeels });
-        if (projData == null) { return; }
-        updateUI(projData);
+        await saveData('/postData', { temp: weatherDesc, date: newDate, content: howItFeels });
     }
 
-    const updateUI = (projData) => {
+    const updateUI = async() => { // Get data object from the server and update UI
+        const projData = await getData('/getData');
+        if (projData == null) { return; }
         document.querySelector('#date').textContent = String.fromCodePoint(128197) + projData.date;
         document.querySelector('#temp').textContent = String.fromCodePoint(127777) + projData.temp;
         document.querySelector('#content').textContent = String.fromCodePoint(128153) + projData.content;
     }
 
-    /*** END Application Main functions ***/
+    /**
+     ** END Application Main functions 
+     **/
 
 
-    /*** Event Listeners ***/
+
+
+    /**
+     ** Event Listeners 
+     **/
     document.querySelector('#generate').addEventListener('click', checkWeather);
 
-    /*** END Event Listeners ***/
+    /**
+     ** END Event Listeners 
+     **/
 });
