@@ -20,12 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const buildWeatherURL = (zipcode) => { return baseURL + zipcode + apiKey; }
 
-    const handleResCode = (resCode) => {
-        switch (resCode) {
-
-        }
-    }
-
     const formatWeather = (weather) => { // weather object return from the Web API
         return `Temperature: ${(weather.main.temp- 273.15).toFixed(2)}${String.fromCodePoint(8451)}
     (${(weather.main.temp_max - 273.15).toFixed(2)}${String.fromCodePoint(8451)}${String.fromCodePoint(128316)} - ${(weather.main.temp_min - 273.15).toFixed(2)}${String.fromCodePoint(8451)}${String.fromCodePoint(128317)})
@@ -43,12 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch(url);
         try {
             const resData = await res.json();
-            if (resData.cod != 200) { handleResCode(resData.cod); return null; }
-            console.log(resData);
+            if (resData.cod != 200) { alert(resData.message); return 0; }
             return formatWeather(resData);
 
         } catch (error) {
             console.log('Error Occurred:', error);
+            alert('Error in loading zip code data!');
             return null;
         }
     }
@@ -67,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return projectData;
         } catch (error) {
             console.log('Error in Saving Data', error);
-            alert('an error occurred please try again');
+            alert('An error occurred please try again');
             return null;
         }
     }
@@ -82,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isNullOrEmpty(zipCode)) { alert('Incorrect Zip, enter valid Zip'); return; }
         getWeather(buildWeatherURL, zipCode)
             .then(async(data) => {
-                if (isNullOrEmpty(data)) { alert('Error in loading zip code data!'); return; }
+                if (isNullOrEmpty(data) || data == 0) { return; }
                 getUserEntriesAndSave(data);
             });
     }
@@ -94,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // if (isNullOrEmpty(howItFeels)) { alert('Please enter How Are You Feeling Today.'); return; }
 
         const projData = await saveData('/postData', { temp: weatherDesc, date: newDate, content: howItFeels });
-        if (projData == null) { alert('An error occurred during process request, try again later!'); return; }
+        if (projData == null) { return; }
         updateUI(projData);
     }
 
