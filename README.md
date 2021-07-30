@@ -26,7 +26,7 @@ This repo contains a web application files:
 ## Technologies
 - HTML: used to structure the skelton of the web page, the contained elements and data.
 - CSS: to apply some appearance styles, such as elements colors, sizes and positions.
-- JavaScript: to apply some user interactions with the website by performing some actions by either user clicks or scrolling through the page to make the page responsive.
+- JavaScript: to apply some user interactions with the website by performing some actions by user clicks, and to make remote call to Web API.
 
 ## Resources
 - fonts.googleapis.com : to apply some font styles to the page text.
