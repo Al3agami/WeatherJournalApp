@@ -34,5 +34,4 @@ app.post('/postData', (req, res) => {
 
 app.get('/getData', (req, res) => {
     res.send(projectData);
-    console.log(movies);
 });
