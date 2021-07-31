@@ -1,3 +1,5 @@
+// const { default: axios } = require("axios");
+
 /**
  * example:
  * api.openweathermap.org/data/2.5/weather?zip=94040,us&appid={API key}
@@ -7,11 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
      ** Global Variables
      **/
     const baseURL = 'https://api.openweathermap.org/data/2.5/weather?zip=';
-    const apiKey = ',us&appid=4a757f3c4ec2d8ed17d63e4f714e75a2';
+    const apiKey = ',us&appid=4a757f3c4ec2d8ed17d63e4f714e75a2&units=metric';
 
     // Create a new date instance dynamically with JS
-    let d = new Date();
-    let newDate = d.getMonth() + '.' + d.getDate() + '.' + d.getFullYear();
+    /** Date position changed to be initiated per each click event below,
+     * because the page can be loaded from the previous day*/
+    // let d = new Date();
+    // let newDate = (d.getMonth() + 1) + '.' + d.getDate() + '.' + d.getFullYear();
+    // //**OR**//
+    // let newDate = d.toDateString();
 
     /**
      ** END Global Variables 
@@ -27,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const buildWeatherURL = (zipcode) => { return baseURL + zipcode + apiKey; }
 
     const formatWeather = (weather) => { // weather object return from the Web API
-        return `Temperature: ${(weather.main.temp- 273.15).toFixed(2)}${String.fromCodePoint(8451)}
-    (${(weather.main.temp_max - 273.15).toFixed(2)}${String.fromCodePoint(8451)}${String.fromCodePoint(128316)} - ${(weather.main.temp_min - 273.15).toFixed(2)}${String.fromCodePoint(8451)}${String.fromCodePoint(128317)})
+        return `Temperature: ${(weather.main.temp)}${String.fromCodePoint(8451)}
+    (${(weather.main.temp_max)}${String.fromCodePoint(8451)}${String.fromCodePoint(128316)} - ${(weather.main.temp_min)}${String.fromCodePoint(8451)}${String.fromCodePoint(128317)})
     / Humidity: ${weather.main.humidity} 
     / ${weather.weather[0].description}`;
     }
@@ -43,18 +49,15 @@ document.addEventListener('DOMContentLoaded', () => {
      ** API Calls Functions 
      **/
     const getWeather = async(buildWeatherURL, zipCode = '') => { // Build url with zipCode arg, and get the weather
-        const url = buildWeatherURL(zipCode);
-        const res = await fetch(url);
-        try {
-            const resData = await res.json();
-            if (resData.cod != 200) { alert(resData.message); return 0; }
-            return formatWeather(resData);
-
-        } catch (error) {
-            console.log('Error Occurred:', error);
-            alert('Error in loading zip code data!');
-            return null;
-        }
+        return axios.get(buildWeatherURL(zipCode))
+            .then(res => {
+                if (res.data.cod != 200) { alert(res.data.message); return 0; }
+                return formatWeather(res.data);
+            }).catch(err => {
+                alert('An error occured please try again!');
+                console.log('Error Occurred:', err);
+                return null;
+            });
     }
 
 
@@ -65,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/json', },
             body: JSON.stringify(data),
         });
-
         try {
             const projectData = await req.json();
             return projectData;
@@ -74,18 +76,26 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('An error occurred please try again');
             return null;
         }
+        /**
+         * I have tried axios but I felt it is a bit slower!! Is that right ?!
+         * **/
+        // return axios.post(url, data)
+        //     .then(res => {
+        //         console.log(res.data);
+        //         return res.data;
+        //     }).catch(err => {
+        //         alert('An error occured please try again!');
+        //         console.log('Error in Saving Data:', err);
+        //         return null;
+        //     });
     }
 
     const getData = async url => { // Get Weather data from server projectData
-        const res = await fetch(url);
-        try {
-            const projData = await res.json();
-            return projData;
-        } catch (error) {
+        return axios.get(url).then(res => res.data).catch(err => {
             alert('An error occured please try again');
-            console.log('An error occured:', console.error());
+            console.log('An error occured:', console.error(err));
             return null;
-        }
+        });
     }
 
     /**
@@ -102,9 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isNullOrEmpty(zipCode)) { alert('Please enter Zip code'); return; }
         getWeather(buildWeatherURL, zipCode)
             .then((weatherDesc) => {
-                if (weatherDesc == 0 || isNullOrEmpty(weatherDesc)) { throw new Error('BreakChain'); }
-                getUserEntriesAndSaveWeather(weatherDesc);
-            }).then(() => {
+                if (weatherDesc == 0 || isNullOrEmpty(weatherDesc)) { throw new Error('BreakChain: error in loading weather'); }
+                return getUserEntriesAndSaveWeather(weatherDesc);
+            }).then((res) => {
+                if (isNullOrEmpty(res)) throw new Error('BreakChain: data didn\'t posted successfuly.');
                 updateUI();
             }).catch(err => {
                 console.log(err);
@@ -116,12 +127,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const howItFeels = document.querySelector('#feelings').value;
         // We can make the feeling area mandatory by removing comment from the next line:
         // if (isNullOrEmpty(howItFeels)) { alert('Please enter How Are You Feeling Today.'); return; }
-        await saveData('/postData', { temp: weatherDesc, date: newDate, content: howItFeels });
+        return await saveData('/postData', { temp: weatherDesc, date: new Date().toDateString(), content: howItFeels });
     }
 
     const updateUI = async() => { // Get data object from the server and update UI
         const projData = await getData('/getData');
-        if (projData == null) { return; }
+        if (projData == null) { console.log('entered'); return; }
         document.querySelector('#date').textContent = String.fromCodePoint(128197) + projData.date;
         document.querySelector('#temp').textContent = String.fromCodePoint(127777) + projData.temp;
         document.querySelector('#content').textContent = String.fromCodePoint(128153) + projData.content;

@@ -14,6 +14,9 @@ const bodyParser = require('body-parser');
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// Add Axios to work in fetching API data in node.js
+const axios = require('axios');
+
 // Cors for cross origin allowance
 const cors = require('cors');
 app.use(cors());
