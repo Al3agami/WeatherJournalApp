@@ -22,6 +22,8 @@ This repo contains a web application files:
 - HTML file.
 - CSS file.
 - JavaScript (Server file, Client Side file).
+- Package JSON 
+- Utilized Node Packages Folder
 
 ## Technologies
 - HTML: used to structure the skelton of the web page, the contained elements and data.
